@@ -12,4 +12,9 @@ class SessionRepositoryImpl implements SessionRepository {
     return _sessionSource.fetch();
   }
 
+  @override
+  Future<List<SessionSourceModel>> fetchNextPage() {
+   return _sessionSource.fetchNextPage();
+  }
+
 }

@@ -4,8 +4,42 @@ import 'package:intl/intl.dart';
 import 'package:list_project/feature/presentation/bloc/day_sessions.dart';
 import 'package:list_project/feature/presentation/bloc/session_bloc.dart';
 
-class  SessionScreen extends StatelessWidget {
+class  SessionScreen extends StatefulWidget {
   const SessionScreen({super.key});
+
+  @override
+  State<SessionScreen> createState() => _SessionScreenState();
+}
+
+class _SessionScreenState extends State<SessionScreen> {
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+
+  }
+
+  void _onScroll() {
+    if (_isBottom) {
+      context.read<SessionBloc>().add(SessionLoadMoreEvent());
+    }
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +52,12 @@ class  SessionScreen extends StatelessWidget {
            return Center(child: CircularProgressIndicator());
          }
          return ListView.builder(
+           controller: _scrollController,
            itemCount: state.listDaySessions.length,
            itemBuilder: (context, index) {
+             // if (index >= state.listDaySessions.length) {
+             //   return Center(child: CircularProgressIndicator());
+             // }
              final day = state.listDaySessions[index];
              return _buildDayCard(day);
            },

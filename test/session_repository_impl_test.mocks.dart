@@ -41,4 +41,14 @@ class MockSessionSource extends _i1.Mock implements _i2.SessionSource {
             ),
           )
           as _i3.Future<List<_i4.SessionSourceModel>>);
+
+  @override
+  _i3.Future<List<_i4.SessionSourceModel>> fetchNextPage() =>
+      (super.noSuchMethod(
+            Invocation.method(#fetchNextPage, []),
+            returnValue: _i3.Future<List<_i4.SessionSourceModel>>.value(
+              <_i4.SessionSourceModel>[],
+            ),
+          )
+          as _i3.Future<List<_i4.SessionSourceModel>>);
 }

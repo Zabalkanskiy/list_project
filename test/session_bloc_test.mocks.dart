@@ -33,9 +33,9 @@ class MockSessionUseCase extends _i1.Mock implements _i2.SessionUseCase {
   }
 
   @override
-  _i3.Future<List<_i4.DaySessions>> fetch() =>
+  _i3.Future<List<_i4.DaySessions>> fetch({bool? firstPage = true}) =>
       (super.noSuchMethod(
-            Invocation.method(#fetch, []),
+            Invocation.method(#fetch, [], {#firstPage: firstPage}),
             returnValue: _i3.Future<List<_i4.DaySessions>>.value(
               <_i4.DaySessions>[],
             ),

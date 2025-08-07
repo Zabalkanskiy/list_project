@@ -11,6 +11,7 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
   SessionBloc({required SessionUseCase  sessionUseCase}) :
         _sessionUseCase = sessionUseCase, super(SessionState(listDaySessions: [],isLoading: true )) {
     on<SessionLoadingEvent>(onSessionLoadingEvent);
+    on<SessionLoadMoreEvent>(onSessionLoadMoreEvent);
   }
 
   Future<void> onSessionLoadingEvent(
@@ -25,11 +26,32 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     }
   }
 
+  Future<void> onSessionLoadMoreEvent(
+      SessionLoadMoreEvent event,
+      Emitter<SessionState> emit,
+      ) async {
+    try {
+      List<DaySessions> newDays = await _sessionUseCase.fetch(firstPage: false);
+      // Создаем новый список, объединяя старые и новые данные
+      List<DaySessions> updatedList = List.from(state.listDaySessions)..addAll(newDays);
+
+      // Эмитим новое состояние с обновленным списком
+      emit(state.copyWith(
+        listDaySessions: updatedList,
+      ));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    }
+
+  }
+
 }
 
 abstract class SessionEvent {}
 
 class SessionLoadingEvent extends SessionEvent {}
+
+class SessionLoadMoreEvent extends SessionEvent {}
 
 class SessionState extends Equatable {
  final List<DaySessions> listDaySessions;
