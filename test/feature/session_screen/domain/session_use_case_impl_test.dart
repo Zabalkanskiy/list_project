@@ -1,10 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:list_project/core/sourse/model/session_source_model.dart';
+import 'package:list_project/feature/session_screen/data/session_repository.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:list_project/feature/domain/session_use_case_impl.dart';
-import 'package:list_project/feature/data/session_repository.dart';
-import 'package:list_project/feature/presentation/bloc/day_sessions.dart';
+import 'package:list_project/feature/session_screen/domain/session_use_case_impl.dart';
 
 @GenerateMocks([SessionRepository])
 import 'session_use_case_impl_test.mocks.dart';

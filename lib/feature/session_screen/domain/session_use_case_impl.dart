@@ -1,8 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:list_project/core/sourse/model/session_source_model.dart';
-import 'package:list_project/feature/data/session_repository.dart';
-import 'package:list_project/feature/domain/session_use_case.dart';
-import 'package:list_project/feature/presentation/bloc/day_sessions.dart';
+import 'package:list_project/feature/session_screen/data/session_repository.dart';
+import 'package:list_project/feature/session_screen/domain/session_use_case.dart';
+import 'package:list_project/feature/session_screen/presentation/bloc/day_sessions.dart';
 
 class SessionUseCaseImpl implements SessionUseCase {
   final SessionRepository _sessionRepository;

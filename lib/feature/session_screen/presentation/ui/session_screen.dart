@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:list_project/feature/presentation/bloc/day_sessions.dart';
-import 'package:list_project/feature/presentation/bloc/session_bloc.dart';
+import 'package:list_project/feature/session_screen/presentation/bloc/day_sessions.dart';
+import 'package:list_project/feature/session_screen/presentation/bloc/session_bloc.dart';
 
 class  SessionScreen extends StatefulWidget {
   const SessionScreen({super.key});

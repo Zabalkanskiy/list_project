@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:list_project/feature/session_screen/data/session_repository_impl.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:list_project/core/sourse/model/session_source_model.dart';
 import 'package:list_project/core/sourse/session_source.dart';
-import 'package:list_project/feature/data/session_repository_impl.dart';
 
 @GenerateMocks([SessionSource])
 import 'session_repository_impl_test.mocks.dart';

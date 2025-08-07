@@ -1,6 +1,6 @@
 import 'package:list_project/core/sourse/model/session_source_model.dart';
 import 'package:list_project/core/sourse/session_source.dart';
-import 'package:list_project/feature/data/session_repository.dart';
+import 'package:list_project/feature/session_screen/data/session_repository.dart';
 
 class SessionRepositoryImpl implements SessionRepository {
   final SessionSource _sessionSource;

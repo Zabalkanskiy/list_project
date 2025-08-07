@@ -2,9 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:list_project/feature/presentation/bloc/session_bloc.dart';
-import 'package:list_project/feature/domain/session_use_case.dart';
-import 'package:list_project/feature/presentation/bloc/day_sessions.dart';
+import 'package:list_project/feature/session_screen/presentation/bloc/session_bloc.dart';
+import 'package:list_project/feature/session_screen/domain/session_use_case.dart';
+import 'package:list_project/feature/session_screen/presentation/bloc/day_sessions.dart';
 
 @GenerateMocks([SessionUseCase])
 import 'session_bloc_test.mocks.dart';

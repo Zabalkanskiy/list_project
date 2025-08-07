@@ -1,11 +1,11 @@
 import 'package:get_it/get_it.dart';
 import 'package:list_project/core/sourse/session_source.dart';
 import 'package:list_project/core/sourse/session_source_impl.dart';
-import 'package:list_project/feature/data/session_repository.dart';
-import 'package:list_project/feature/data/session_repository_impl.dart';
-import 'package:list_project/feature/domain/session_use_case.dart';
-import 'package:list_project/feature/domain/session_use_case_impl.dart';
-import 'package:list_project/feature/presentation/bloc/session_bloc.dart';
+import 'package:list_project/feature/session_screen/data/session_repository.dart';
+import 'package:list_project/feature/session_screen/data/session_repository_impl.dart';
+import 'package:list_project/feature/session_screen/domain/session_use_case.dart';
+import 'package:list_project/feature/session_screen/domain/session_use_case_impl.dart';
+import 'package:list_project/feature/session_screen/presentation/bloc/session_bloc.dart';
 
 final getIt = GetIt.instance;
 

@@ -1,9 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:list_project/core/sourse/model/session_source_model.dart';
-import 'package:list_project/feature/data/session_repository.dart';
-import 'package:list_project/feature/domain/session_use_case.dart';
-import 'package:list_project/feature/presentation/bloc/day_sessions.dart';
+import 'package:list_project/feature/session_screen/domain/session_use_case.dart';
+import 'package:list_project/feature/session_screen/presentation/bloc/day_sessions.dart';
 
 class SessionBloc extends Bloc<SessionEvent, SessionState> {
   SessionUseCase _sessionUseCase;
