@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:list_project/feature/session_screen/presentation/bloc/day_sessions.dart';
 import 'package:list_project/feature/session_screen/presentation/bloc/session_bloc.dart';
 
-class  SessionScreen extends StatefulWidget {
+class SessionScreen extends StatefulWidget {
   const SessionScreen({super.key});
 
   @override
@@ -18,7 +18,6 @@ class _SessionScreenState extends State<SessionScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-
   }
 
   void _onScroll() {
@@ -40,31 +39,30 @@ class _SessionScreenState extends State<SessionScreen> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
-   return Scaffold(
-     backgroundColor: Colors.grey[300] ,
-     body: BlocConsumer<SessionBloc, SessionState>(
-       listener: (context, state) {},
-       builder: (context, state) {
-         if (state.isLoading) {
-           return Center(child: CircularProgressIndicator());
-         }
-         return ListView.builder(
-           controller: _scrollController,
-           itemCount: state.listDaySessions.length,
-           itemBuilder: (context, index) {
-             // if (index >= state.listDaySessions.length) {
-             //   return Center(child: CircularProgressIndicator());
-             // }
-             final day = state.listDaySessions[index];
-             return _buildDayCard(day);
-           },
-         );
-       }
-     ),
-   );
+    return Scaffold(
+      backgroundColor: Colors.grey[300],
+      body: BlocConsumer<SessionBloc, SessionState>(
+        listener: (context, state) {},
+        builder: (context, state) {
+          if (state.isLoading) {
+            return Center(child: CircularProgressIndicator());
+          }
+          return ListView.builder(
+            controller: _scrollController,
+            itemCount: state.listDaySessions.length,
+            itemBuilder: (context, index) {
+              // if (index >= state.listDaySessions.length) {
+              //   return Center(child: CircularProgressIndicator());
+              // }
+              final day = state.listDaySessions[index];
+              return _buildDayCard(day);
+            },
+          );
+        },
+      ),
+    );
   }
 }
 
@@ -83,62 +81,45 @@ Widget _buildDayCard(DaySessions day) {
             children: [
               Text(
                 'Date:',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.black),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
               ),
               Text(
                 DateFormat('EEEE, MMMM d, y').format(day.date), // Форматируем дату
-                style:  TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Colors.black,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
               ),
-
             ],
           ),
         ),
 
-        // Список сессий за день
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: day.sessions.length,
-          separatorBuilder: (context, index) => const Divider(height: 1),
 
-          itemBuilder: (context, index) {
-            final session = day.sessions[index];
-            final isFirst = index == 0;
-            final isLast = index == day.sessions.length - 1;
-            return Container(
-              decoration: BoxDecoration(
+        SizedBox(
+          // Фиксируем высоту
+          height: day.sessions.length * 56.0, // Вычисленная высота
+          child: ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: day.sessions.length,
+            itemBuilder: (context, index) {
+              final session = day.sessions[index];
+              final isFirst = index == 0;
+              final isLast = index == day.sessions.length - 1;
+
+              return Container(
+                height: 56.0, // Фиксированная высота элемента
+                decoration: BoxDecoration(
                   color: Colors.white,
-                borderRadius: isFirst && isLast
-                    ? BorderRadius.circular(12) // Если только один элемент
-                    : isFirst
-                    ? const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                )
-                    : isLast
-                    ? const BorderRadius.only(
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
-                )
-                    : BorderRadius.zero,
+                  borderRadius: _getBorderRadius(isFirst, isLast),
+                  border: !isLast ? const Border(bottom: BorderSide(width: 1.0, color: Colors.grey)) : null,
                 ),
-              child: ListTile(
-
-                title: Text(session.customer),
-                trailing: Text(
-                  session.amount.toStringAsFixed(2),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                child: ListTile(
+                  title: Text(session.customer),
+                  trailing: Text(
+                    session.amount.toStringAsFixed(2),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
 
         // Итог за день
@@ -150,19 +131,11 @@ Widget _buildDayCard(DaySessions day) {
             children: [
               const Text(
                 'Total:',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.grey),
               ),
               Text(
                 day.total.toStringAsFixed(2),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.grey),
               ),
             ],
           ),
@@ -170,4 +143,11 @@ Widget _buildDayCard(DaySessions day) {
       ],
     ),
   );
+}
+
+BorderRadius _getBorderRadius(bool isFirst, bool isLast) {
+  if (isFirst && isLast) return BorderRadius.circular(12);
+  if (isFirst) return const BorderRadius.vertical(top: Radius.circular(12));
+  if (isLast) return const BorderRadius.vertical(bottom: Radius.circular(12));
+  return BorderRadius.zero;
 }
