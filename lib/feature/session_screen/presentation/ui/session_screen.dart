@@ -13,6 +13,7 @@ class SessionScreen extends StatefulWidget {
 
 class _SessionScreenState extends State<SessionScreen> {
   final _scrollController = ScrollController();
+  static final DateFormat _dateFormat = DateFormat('EEEE, MMMM d, y');
 
   @override
   void initState() {
@@ -47,18 +48,69 @@ class _SessionScreenState extends State<SessionScreen> {
         listener: (context, state) {},
         builder: (context, state) {
           if (state.isLoading) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
-          return ListView.builder(
+          ///общий список дней с записями
+          final List<DaySessions> days = state.listDaySessions;
+
+          // Precompute day section lengths and offsets for O(log n) index -> day mapping
+          ///список соостоящий из колличества записей в дне + 2 хэдер и футер
+          final List<int> daySectionLengths = List<int>.generate(
+            days.length,
+            (int i) => days[i].sessions.length + 2, // header + sessions + total
+            growable: false,
+          );
+          ///используется для подсчета отступов пишет общую сумму runningTotal в конкретном дне
+          ///что бы найти конкретные данные используется
+          final List<int> dayOffsets = <int>[];
+          ///общее колличество элементов в списке
+          ///элементы (хэдер колличество записей в дне и футор) в одном элементе содержатся
+          ///для построения списка используется
+          int runningTotal = 0;
+          for (final length in daySectionLengths) {
+            dayOffsets.add(runningTotal);
+            runningTotal += length;
+          }
+
+          return CustomScrollView(
             controller: _scrollController,
-            itemCount: state.listDaySessions.length,
-            itemBuilder: (context, index) {
-              // if (index >= state.listDaySessions.length) {
-              //   return Center(child: CircularProgressIndicator());
-              // }
-              final day = state.listDaySessions[index];
-              return _buildDayCard(day);
-            },
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildBuilderDelegate((
+                  BuildContext context,
+                  int index,
+                ) {
+                  final int dayIndex = _findDayIndex(dayOffsets, index);
+                  final DaySessions day = days[dayIndex];
+                  ///первый индекс списка хэдер если 0
+                  final int localIndex = index - dayOffsets[dayIndex];
+                  /// общая длина локального списка
+                  final int sessionsCount = day.sessions.length;
+
+                  if (localIndex == 0) {
+                    return _DayHeader(
+                      formattedDate: _dateFormat.format(day.date),
+                    );
+                  }
+                  ///футер ели больше элементов списка +2(хэдер + футер)
+                  if (localIndex == sessionsCount + 1) {
+                    return _DayTotal(total: day.total);
+                  }
+
+                  // session row
+                  ///непонял
+                  final session = day.sessions[localIndex - 1];
+                  final bool isFirst = localIndex == 1;
+                  final bool isLast = localIndex == sessionsCount;
+                  return _SessionRow(
+                    customer: session.customer,
+                    amount: session.amount,
+                    isFirst: isFirst,
+                    isLast: isLast,
+                  );
+                }, childCount: runningTotal),
+              ),
+            ],
           );
         },
       ),
@@ -66,88 +118,125 @@ class _SessionScreenState extends State<SessionScreen> {
   }
 }
 
-Widget _buildDayCard(DaySessions day) {
-  return Container(
-    margin: const EdgeInsets.all(8.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Заголовок с датой
-        Container(
-          padding: const EdgeInsets.all(12.0),
-          color: Colors.grey[300],
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Date:',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
-              ),
-              Text(
-                DateFormat('EEEE, MMMM d, y').format(day.date), // Форматируем дату
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
-              ),
-            ],
-          ),
-        ),
-
-
-        SizedBox(
-          // Фиксируем высоту
-          height: day.sessions.length * 56.0, // Вычисленная высота
-          child: ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: day.sessions.length,
-            itemBuilder: (context, index) {
-              final session = day.sessions[index];
-              final isFirst = index == 0;
-              final isLast = index == day.sessions.length - 1;
-
-              return Container(
-                height: 56.0, // Фиксированная высота элемента
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: _getBorderRadius(isFirst, isLast),
-                  border: !isLast ? const Border(bottom: BorderSide(width: 1.0, color: Colors.grey)) : null,
-                ),
-                child: ListTile(
-                  title: Text(session.customer),
-                  trailing: Text(
-                    session.amount.toStringAsFixed(2),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-
-        // Итог за день
-        Container(
-          padding: const EdgeInsets.all(12.0),
-          color: Colors.grey[300],
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Total:',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.grey),
-              ),
-              Text(
-                day.total.toStringAsFixed(2),
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
+int _findDayIndex(List<int> dayOffsets, int globalIndex) {
+  // Binary search for the greatest offset <= globalIndex
+  int low = 0;
+  int high = dayOffsets.length - 1;
+  while (low <= high) {
+    final int mid = low + ((high - low) >> 1);
+    if (dayOffsets[mid] == globalIndex) {
+      return mid;
+    } else if (dayOffsets[mid] < globalIndex) {
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+  return high.clamp(0, dayOffsets.length - 1);
 }
 
-BorderRadius _getBorderRadius(bool isFirst, bool isLast) {
-  if (isFirst && isLast) return BorderRadius.circular(12);
-  if (isFirst) return const BorderRadius.vertical(top: Radius.circular(12));
-  if (isLast) return const BorderRadius.vertical(bottom: Radius.circular(12));
-  return BorderRadius.zero;
+class _DayHeader extends StatelessWidget {
+  final String formattedDate;
+  const _DayHeader({required this.formattedDate});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(left: 8, right: 8, top: 8),
+      padding: const EdgeInsets.all(12.0),
+      color: Colors.grey[300],
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          const Text(
+            'Date:',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.black,
+            ),
+          ),
+          Text(
+            formattedDate,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SessionRow extends StatelessWidget {
+  final String customer;
+  final num amount;
+  final bool isFirst;
+  final bool isLast;
+
+  const _SessionRow({
+    required this.customer,
+    required this.amount,
+    required this.isFirst,
+    required this.isLast,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 56.0,
+      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: _getBorderRadius(isFirst, isLast),
+        border: !isLast
+            ? const Border(bottom: BorderSide(width: 1.0, color: Colors.grey))
+            : null,
+      ),
+      child: ListTile(
+        title: Text(customer),
+        trailing: Text(
+          amount.toStringAsFixed(0),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  BorderRadius _getBorderRadius(bool isFirst, bool isLast) {
+    if (isFirst && isLast) return BorderRadius.circular(12);
+    if (isFirst) return const BorderRadius.vertical(top: Radius.circular(12));
+    if (isLast) return const BorderRadius.vertical(bottom: Radius.circular(12));
+    return BorderRadius.zero;
+  }
+}
+
+class _DayTotal extends StatelessWidget {
+  final double total;
+  const _DayTotal({required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(left: 12, right: 16, bottom: 8),
+      padding: const EdgeInsets.all(12.0),
+      color: Colors.grey[300],
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(
+            'Total:',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.grey,
+            ),
+          ),
+          Text(total.toStringAsFixed(0)), // Добавить отображение
+        ],
+      ),
+    );
+  }
 }
