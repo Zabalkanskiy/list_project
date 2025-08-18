@@ -98,7 +98,7 @@ class _SessionScreenState extends State<SessionScreen> {
                   }
 
                   // session row
-                  ///непонял
+
                   final session = day.sessions[localIndex - 1];
                   final bool isFirst = localIndex == 1;
                   final bool isLast = localIndex == sessionsCount;
